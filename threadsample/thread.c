@@ -6,7 +6,7 @@
 
 static void *pull_one_url(void *i)
 {
-    printf("I'm thread[%d]\n", i);
+    printf("I'm thread[%d]\n", (int)i);
 #ifdef METHOD_1
     pthread_detach(pthread_self());
 #endif
