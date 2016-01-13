@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <sys/vfs.h>
 
+static long kscale(long b, long bs)
+{
+    return ( b * (long long) bs + 1024/2 ) / 1024;
+}
+
 int main(int argc,char *argv[])
 {
     struct statfs sbuf;
@@ -13,9 +18,16 @@ int main(int argc,char *argv[])
     }
 
     printf("%s\n", argv[1]);
+
     if ((ret=statfs(argv[1], &sbuf)) != 0) {
         printf("error![%d]\n",ret);
         return (-1);
     }
-    printf("size f_blocks[%lu] f_bsize[%lu]\n", sbuf.f_blocks, sbuf.f_bsize);
+
+    printf(" %9lu %9lu %9lu \n",
+            kscale(sbuf.f_blocks, sbuf.f_bsize),
+            kscale(sbuf.f_blocks - sbuf.f_bfree, sbuf.f_bsize),
+            kscale(sbuf.f_bavail, sbuf.f_bsize));
+
+    return 0;
 }
