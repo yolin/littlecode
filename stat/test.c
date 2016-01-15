@@ -1,6 +1,31 @@
 #include <stdio.h>
-#include <sys/vfs.h>
+//#include <sys/vfs.h>
+//#include "sys/syscall.h"
+#include <linux/unistd.h>
 
+typedef struct {
+    int val[2];
+} __kernel_fsid_t;
+
+
+
+struct statfs {
+    int f_type;
+    int f_bsize;
+    unsigned long long f_blocks;
+    unsigned long long f_bfree;
+    unsigned long long f_bavail;
+    unsigned long long f_files;
+    unsigned long long f_ffree;
+    __kernel_fsid_t f_fsid;
+    int f_namelen;
+    int f_frsize;
+//  int f_flags;
+    int f_spare[5];
+};
+
+#define __NR_mysyscall (__NR_SYSCALL_BASE+378)
+#define mysyscall(a,b) syscall(__NR_mysyscall,(a),(b))
 
 #define BLOCK_SIZE 4 //k
 
@@ -22,6 +47,11 @@ int main(int argc, char * argv[])
     else
         bsize=BLOCK_SIZE;
 
+    printf("yolin test mysyscall\n");
+    mysyscall(4,3);
+
+
+    printf("yolin test statfs call\n");
     int i = statfs(argv[1], &sfs);
     int percent = (sfs.f_blocks - sfs.f_bfree ) * 100 / (sfs.f_blocks - sfs.f_bfree + sfs.f_bavail);
 
