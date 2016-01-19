@@ -1,0 +1,38 @@
+diff --git a/MIPS32_KNLAPPS/busybox-1.21.x/coreutils/df.c b/MIPS32_KNLAPPS/busybox-1.21.x/coreutils/df.c
+index 5e9a867..50e7c4c 100644
+--- a/MIPS32_KNLAPPS/busybox-1.21.x/coreutils/df.c
++++ b/MIPS32_KNLAPPS/busybox-1.21.x/coreutils/df.c
+@@ -68,6 +68,15 @@ static unsigned long kscale(unsigned long b, unsigned long bs)
+ }
+ #endif
+ 
++#define __NR_statfs2 378
++
++int statfs2(const char * path, struct statfs64 * statfs)
++{
++    int ret;
++    ret = syscall(__NR_statfs2, path, statfs);
++    return ret;
++
++}
+ int df_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
+ int df_main(int argc UNUSED_PARAM, char **argv)
+ {
+@@ -78,7 +87,7 @@ int df_main(int argc UNUSED_PARAM, char **argv)
+ 	unsigned opt;
+ 	FILE *mount_table;
+ 	struct mntent *mount_entry;
+-	struct statfs s;
++	struct statfs64 s;
+ 
+ 	enum {
+ 		OPT_KILO  = (1 << 0),
+@@ -171,7 +180,7 @@ int df_main(int argc UNUSED_PARAM, char **argv)
+ 		device = mount_entry->mnt_fsname;
+ 		mount_point = mount_entry->mnt_dir;
+ 
+-		if (statfs(mount_point, &s) != 0) {
++		if (statfs2(mount_point, &s) != 0) {
+ 			bb_simple_perror_msg(mount_point);
+ 			goto set_error;
+ 		}

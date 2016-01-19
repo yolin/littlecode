@@ -1,0 +1,15 @@
+--- /opt/toolchains/arm-unknown-linux-uclibcgnueabi-4.4.0_ARMv5TE-2015-05-12/arm-unknown-linux-uclibcgnueabi/sysroot/usr/include/sys/statfs.h	2015-05-12 17:02:50.000000000 +0800
++++ /opt/toolchains/arm-unknown-linux-uclibcgnueabi-4.4.0_ARMv5TE-2015-05-12_new/arm-unknown-linux-uclibcgnueabi/sysroot/usr/include/sys/statfs.h	2016-01-15 17:17:39.500606304 +0800
+@@ -33,9 +33,9 @@
+      __THROW __nonnull ((1, 2));
+ #else
+ # ifdef __REDIRECT_NTH
+-extern int __REDIRECT_NTH (statfs,
+-			   (__const char *__file, struct statfs *__buf),
+-			   statfs64) __nonnull ((1, 2));
++//extern int __REDIRECT_NTH (statfs,
++//			   (__const char *__file, struct statfs *__buf),
++//			   statfs64) __nonnull ((1, 2));
+ # else
+ #  define statfs statfs64
+ # endif

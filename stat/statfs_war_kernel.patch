@@ -1,0 +1,63 @@
+diff --git a/arch/arm/include/asm/unistd.h b/arch/arm/include/asm/unistd.h
+index 512cd14..c6075c2 100755
+--- a/arch/arm/include/asm/unistd.h
++++ b/arch/arm/include/asm/unistd.h
+@@ -404,6 +404,7 @@
+ #define __NR_setns			(__NR_SYSCALL_BASE+375)
+ #define __NR_process_vm_readv		(__NR_SYSCALL_BASE+376)
+ #define __NR_process_vm_writev		(__NR_SYSCALL_BASE+377)
++#define __NR_statfs2			(__NR_SYSCALL_BASE+378)
+ 
+ /*
+  * The following SWIs are ARM private.
+diff --git a/arch/arm/kernel/calls.S b/arch/arm/kernel/calls.S
+index 463ff4a..602dd06 100755
+--- a/arch/arm/kernel/calls.S
++++ b/arch/arm/kernel/calls.S
+@@ -387,6 +387,7 @@
+ /* 375 */	CALL(sys_setns)
+ 		CALL(sys_process_vm_readv)
+ 		CALL(sys_process_vm_writev)
++		CALL(sys_statfs2)
+ #ifndef syscalls_counted
+ .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
+ #define syscalls_counted
+diff --git a/fs/statfs.c b/fs/statfs.c
+index 2aa6a22..ccfbe95 100755
+--- a/fs/statfs.c
++++ b/fs/statfs.c
+@@ -100,6 +100,8 @@ static int do_statfs_native(struct kstatfs *st, struct statfs __user *p)
+ {
+ 	struct statfs buf;
+ 
++    printk("\ndo_statfs_native buf[%d] st[%d] user[%d]\n", sizeof(buf),sizeof(*st),sizeof(*p));
++    printk("\nk sizeof buf.f_blocks[%d]\n", sizeof buf.f_blocks);
+ 	if (sizeof(buf) == sizeof(*st))
+ 		memcpy(&buf, st, sizeof(*st));
+ 	else {
+@@ -141,6 +143,9 @@ static int do_statfs_native(struct kstatfs *st, struct statfs __user *p)
+ static int do_statfs64(struct kstatfs *st, struct statfs64 __user *p)
+ {
+ 	struct statfs64 buf;
++
++    printk("\ndo_statfs64 buf[%d] st[%d] user[%d]\n", sizeof(buf),sizeof(*st),sizeof(*p));
++    printk("\nk sizeof buf.f_blocks[%d]\n", sizeof buf.f_blocks);
+ 	if (sizeof(buf) == sizeof(*st))
+ 		memcpy(&buf, st, sizeof(*st));
+ 	else {
+@@ -171,6 +176,15 @@ SYSCALL_DEFINE2(statfs, const char __user *, pathname, struct statfs __user *, b
+ 	return error;
+ }
+ 
++SYSCALL_DEFINE2(statfs2, const char __user *, pathname, struct statfs64 __user *, buf)
++{
++	struct kstatfs st;
++	int error = user_statfs(pathname, &st);
++	if (!error)
++		error = do_statfs64(&st, (struct statfs64 *)buf);
++	return error;
++}
++
+ SYSCALL_DEFINE3(statfs64, const char __user *, pathname, size_t, sz, struct statfs64 __user *, buf)
+ {
+ 	struct kstatfs st;
