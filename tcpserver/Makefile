@@ -1,4 +1,4 @@
-SERVER_OBJS=tcpserver.o admin_list.o
+SERVER_OBJS=tcpserver.o command_list.o
 CLIENT_OBJS=tcpclient.o
 CFLAGS+=-lcurses
 

@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <pthread.h> 
-#include "admin_list.h"
+#include "command_list.h"
 
 LIST_HEAD(authHead);
 
@@ -30,7 +30,7 @@ void *do_web_server(void *argu) {
 
     char sendBuff[SEG_SIZE];
     time_t ticks; 
-    struct admin_cfg_list command_node;
+    struct command_list_st command_node;
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
@@ -64,8 +64,8 @@ void *do_web_server(void *argu) {
         snprintf(command, sizeof(command), "/littlecode/tcpserver/1.sh &");
         printf("copy command[%s]!!!\n",command);
 
-        admin_list_init_node(&command_node, 1, command);
-        admin_list_add_node(&command_node, &authHead);
+        command_list_init_node(&command_node, 1, command);
+        command_list_add_node(&command_node, &authHead);
         //ticks = time(NULL);
         //snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
         int filesize;
@@ -121,12 +121,12 @@ void *do_command(void *argu) {
     FILE *fp;
     int rc =0 ;
     char result_buf[50];
-    struct admin_cfg_list *command_node;
+    struct command_list_st *command_node;
 
     while (1) {
 
         printf("pthread do_command:\n");
-        command_node=admin_list_find(1, &authHead);
+        command_node=command_list_find(1, &authHead);
         if(!command_node)
         {
             printf("command not found!\n");
@@ -135,7 +135,7 @@ void *do_command(void *argu) {
         }
         printf("do command[%s]\n", command_node->command);
         system(command_node->command);
-        rc=admin_list_delete(command_node->command, &authHead);
+        rc=command_list_delete(command_node->command, &authHead);
         printf("do delete[%s][%s]\n", command_node->command, rc==1?"ok":"ng");
         sleep(1);
     } 
@@ -150,10 +150,10 @@ int main(int argc, char *argv[])
     pthread_create(&thread2, NULL, &do_command, NULL);
     while (1) {
         printf("----------------\n");
-        admin_list_display(&authHead);
+        command_list_display(&authHead);
         printf("----------------\n");
         sleep(1);
     }    
 
-    admin_list_delete_all(&authHead);
+    command_list_delete_all(&authHead);
 }

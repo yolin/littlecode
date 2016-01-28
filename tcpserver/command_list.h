@@ -23,7 +23,7 @@ struct list_head {
 	struct list_head *next, *prev;
 };
 
-struct admin_cfg_list
+struct command_list_st
 {
     int id;
     char command[50];
@@ -475,10 +475,10 @@ static inline void hlist_add_after(struct hlist_node *n,
 		({ tpos = hlist_entry(pos, typeof(*tpos), member); 1;}); \
 	     pos = n)
 
-void admin_list_init_node(struct admin_cfg_list *arg, int id, char *command);
-void admin_list_add_node(struct admin_cfg_list *arg, struct list_head *head);
-struct admin_cfg_list *admin_list_find(int id, struct list_head *head);
-int admin_list_delete( char *command, struct list_head *head);
-void admin_list_display(struct list_head *head);
+void command_list_init_node(struct command_list_st *arg, int id, char *command);
+void command_list_add_node(struct command_list_st *arg, struct list_head *head);
+struct command_list_st *command_list_find(int id, struct list_head *head);
+int command_list_delete( char *command, struct list_head *head);
+void command_list_display(struct list_head *head);
 
 #endif //_LINUX_LIST_H
