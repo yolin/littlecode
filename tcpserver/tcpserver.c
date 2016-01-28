@@ -64,7 +64,7 @@ void *do_web_server(void *argu) {
         snprintf(command, sizeof(command), "/littlecode/tcpserver/1.sh &");
         printf("copy command[%s]!!!\n",command);
 
-        command_list_init_node(&command_node, 1, command);
+        command_list_init_node(&command_node, command);
         command_list_add_node(&command_node, &authHead);
         //ticks = time(NULL);
         //snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
@@ -126,7 +126,7 @@ void *do_command(void *argu) {
     while (1) {
 
         printf("pthread do_command:\n");
-        command_node=command_list_find(1, &authHead);
+        command_node = command_list_get_head(&authHead);
         if(!command_node)
         {
             printf("command not found!\n");
