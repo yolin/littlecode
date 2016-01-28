@@ -11,18 +11,26 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <pthread.h> 
+#include "admin_list.h"
 
-char command[50];
+LIST_HEAD(authHead);
+
+pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER; 
+# define LOCK       pthread_mutex_lock(&mylock)
+# define UNLOCK     pthread_mutex_unlock(&mylock)
+
 
 void *do_web_server(void *argu) {
     int listenfd = 0, connfd = 0;
     struct sockaddr_in serv_addr; 
+    char command[50];
 
 #define MAX_FILE_SIZE 1024000
 #define SEG_SIZE 1024
 
     char sendBuff[SEG_SIZE];
     time_t ticks; 
+    struct admin_cfg_list command_node;
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
@@ -44,7 +52,6 @@ void *do_web_server(void *argu) {
     bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)); 
     listen(listenfd, 10); 
 
-    //signal(SIGCHLD, SIG_IGN);
 
     FILE *fp;
 
@@ -57,6 +64,8 @@ void *do_web_server(void *argu) {
         snprintf(command, sizeof(command), "/littlecode/tcpserver/1.sh");
         printf("copy command[%s]!!!\n",command);
 
+        admin_list_init_node(&command_node, 1, command);
+        admin_list_add_node(&command_node, &authHead);
         //ticks = time(NULL);
         //snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
         int filesize;
@@ -112,11 +121,13 @@ void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
     FILE *fp;
     int rc =0 ;
     char result_buf[50];
+    struct admin_cfg_list *command_node;
 
     while (1) {    
 
         printf("pthread do_command:\n");
-        fp = popen(command, "r");
+        command_node=admin_list_find(1, &authHead);
+        fp = popen(command_node->command, "r");
 
         if(NULL == fp)
         {
@@ -130,7 +141,7 @@ void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
             {
                 result_buf[strlen(result_buf)-1] = '\0';
             }
-            printf("command[%s] output[%s]\n", command, result_buf);
+            printf("command[%s] output[%s]\n", command_node->command, result_buf);
         }
 
         /*等待命令执行完毕并关闭管道及文件指针*/
@@ -142,7 +153,7 @@ void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
         }
         else
         {
-            printf("command[%s] status[%d] return[%d]\n", command, rc, WEXITSTATUS(rc));
+            printf("command[%s] status[%d] return[%d]\n", command_node->command, rc, WEXITSTATUS(rc));
         }
         sleep(1);
     } 
