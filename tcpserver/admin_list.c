@@ -47,7 +47,7 @@ int admin_list_delete(char *command, struct list_head *head)
 
     __list_for_each(iter, head) {
         objPtr = list_entry(iter, struct admin_cfg_list, list_member);
-        if(strncmp(objPtr->command, command, strlen(command))) {
+        if(!strncmp(objPtr->command, command, strlen(command))) {
             list_del(&objPtr->list_member);
             free(objPtr);
             return 1;

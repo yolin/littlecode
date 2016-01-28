@@ -61,7 +61,7 @@ void *do_web_server(void *argu) {
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);    
 
         printf("copy command!!!\n");
-        snprintf(command, sizeof(command), "/littlecode/tcpserver/1.sh");
+        snprintf(command, sizeof(command), "/littlecode/tcpserver/1.sh &");
         printf("copy command[%s]!!!\n",command);
 
         admin_list_init_node(&command_node, 1, command);
@@ -134,6 +134,8 @@ void *do_command(void *argu) {
             continue;
         }
         printf("[%s]\n", command_node->command);
+
+        system(command_node->command);
 #if 0
         fp = popen(command_node->command, "r");
 
@@ -164,6 +166,10 @@ void *do_command(void *argu) {
             printf("command[%s] status[%d] return[%d]\n", command_node->command, rc, WEXITSTATUS(rc));
         }
 #endif
+        //admin_list_find(1, &authHead);
+        printf("do delete[%s]\n", command_node->command);
+        rc=admin_list_delete(command_node->command, &authHead);
+        printf("rc=[%d]\n",rc);
         sleep(1);
     } 
     return NULL;    
