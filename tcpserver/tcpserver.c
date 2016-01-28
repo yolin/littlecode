@@ -133,43 +133,10 @@ void *do_command(void *argu) {
             sleep(1);
             continue;
         }
-        printf("[%s]\n", command_node->command);
-
+        printf("do command[%s]\n", command_node->command);
         system(command_node->command);
-#if 0
-        fp = popen(command_node->command, "r");
-
-        if(NULL == fp)
-        {
-            perror("popen error!");
-            exit(1);
-        }
-        while(fgets(result_buf, sizeof(result_buf), fp) != NULL)
-        {
-            /*为了下面输出好看些，把命令返回的换行符去掉*/
-            if('\n' == result_buf[strlen(result_buf)-1])
-            {
-                result_buf[strlen(result_buf)-1] = '\0';
-            }
-            printf("command[%s] output[%s]\n", command_node->command, result_buf);
-        }
-
-        /*等待命令执行完毕并关闭管道及文件指针*/
-        rc = pclose(fp);
-        if(-1 == rc)
-        {
-            perror("pclose error!");
-            exit(1);
-        }
-        else
-        {
-            printf("command[%s] status[%d] return[%d]\n", command_node->command, rc, WEXITSTATUS(rc));
-        }
-#endif
-        //admin_list_find(1, &authHead);
-        printf("do delete[%s]\n", command_node->command);
         rc=admin_list_delete(command_node->command, &authHead);
-        printf("rc=[%d]\n",rc);
+        printf("do delete[%s][%s]\n", command_node->command, rc==1?"ok":"ng");
         sleep(1);
     } 
     return NULL;    
