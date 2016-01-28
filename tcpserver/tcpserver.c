@@ -117,16 +117,24 @@ void *do_web_server(void *argu) {
     return NULL;    
 }    
 
-void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
+void *do_command(void *argu) {
     FILE *fp;
     int rc =0 ;
     char result_buf[50];
     struct admin_cfg_list *command_node;
 
-    while (1) {    
+    while (1) {
 
         printf("pthread do_command:\n");
         command_node=admin_list_find(1, &authHead);
+        if(!command_node)
+        {
+            printf("command not found!\n");
+            sleep(1);
+            continue;
+        }
+        printf("[%s]\n", command_node->command);
+#if 0
         fp = popen(command_node->command, "r");
 
         if(NULL == fp)
@@ -155,6 +163,7 @@ void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
         {
             printf("command[%s] status[%d] return[%d]\n", command_node->command, rc, WEXITSTATUS(rc));
         }
+#endif
         sleep(1);
     } 
     return NULL;    
@@ -163,14 +172,15 @@ void *do_command(void *argu) {     // 每隔一秒鐘印出一次 Mary 的函數
 int main(int argc, char *argv[])
 {
 
-    pthread_t thread1, thread2;     // 宣告兩個執行緒
-    pthread_create(&thread1, NULL, &do_web_server, NULL);    // 執行緒 print_george
-    pthread_create(&thread2, NULL, &do_command, NULL);    // 執行緒 print_mary
-    while (1) {     // 主程式每隔一秒鐘
-        printf("----------------\n");    // 就印出分隔行
-        sleep(1);     // 停止一秒鐘
+    pthread_t thread1, thread2;
+    pthread_create(&thread1, NULL, &do_web_server, NULL);
+    pthread_create(&thread2, NULL, &do_command, NULL);
+    while (1) {
+        printf("----------------\n");
+        admin_list_display(&authHead);
+        printf("----------------\n");
+        sleep(1);
     }    
 
-
-
+    admin_list_delete_all(&authHead);
 }
