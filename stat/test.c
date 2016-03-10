@@ -1,8 +1,9 @@
 #include <stdio.h>
 //#include <sys/vfs.h>
 //#include "sys/syscall.h"
-#include <linux/unistd.h>
+//#include <linux/unistd.h>
 
+#if 1
 typedef struct {
     int val[2];
 } __kernel_fsid_t;
@@ -24,8 +25,9 @@ struct statfs {
     int f_spare[5];
 };
 
-#define __NR_mysyscall (__NR_SYSCALL_BASE+378)
-#define mysyscall(a,b) syscall(__NR_mysyscall,(a),(b))
+#endif
+//#define __NR_mysyscall (__NR_SYSCALL_BASE+378)
+//#define mysyscall(a,b) syscall(__NR_mysyscall,(a),(b))
 
 #define BLOCK_SIZE 4 //k
 
@@ -47,8 +49,8 @@ int main(int argc, char * argv[])
     else
         bsize=BLOCK_SIZE;
 
-    printf("yolin test mysyscall\n");
-    mysyscall(4,3);
+//    printf("yolin test mysyscall\n");
+//    mysyscall(4,3);
 
 
     printf("yolin test statfs call\n");
