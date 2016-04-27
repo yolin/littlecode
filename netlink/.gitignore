@@ -1,0 +1,9 @@
+.kernel_space.ko.cmd
+.kernel_space.mod.o.cmd
+.kernel_space.o.cmd
+.tmp_versions/
+Module.symvers
+kernel_space.ko
+kernel_space.mod.c
+modules.order
+user_space
