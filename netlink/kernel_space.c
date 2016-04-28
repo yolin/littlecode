@@ -9,24 +9,16 @@
 
 struct sock *nl_sk = NULL;
 
-static void hello_nl_recv_msg(struct sk_buff *skb)
-{
 
+static void hello_nl_send_msg(int pid)
+{
     struct nlmsghdr *nlh;
-    int pid;
     struct sk_buff *skb_out;
     int msg_size;
     char *msg = "Hello from kernel";
     int res;
 
-    printk(KERN_INFO "Entering: %s\n", __FUNCTION__);
-
     msg_size = strlen(msg);
-
-    nlh = (struct nlmsghdr *)skb->data;
-    printk(KERN_INFO "Netlink received msg payload:%s\n", (char *)nlmsg_data(nlh));
-    pid = nlh->nlmsg_pid; /*pid of sending process */
-
     skb_out = nlmsg_new(msg_size, 0);
     if (!skb_out) {
         printk(KERN_ERR "Failed to allocate new skb\n");
@@ -40,6 +32,22 @@ static void hello_nl_recv_msg(struct sk_buff *skb)
     res = nlmsg_unicast(nl_sk, skb_out, pid);
     if (res < 0)
         printk(KERN_INFO "Error while sending bak to user\n");
+}
+
+static void hello_nl_recv_msg(struct sk_buff *skb)
+{
+    struct nlmsghdr *nlh;
+    int pid;
+
+    printk(KERN_INFO "Entering: %s\n", __FUNCTION__);
+
+    nlh = (struct nlmsghdr *)skb->data;
+    pid = nlh->nlmsg_pid; /*pid of sending process */
+
+    printk(KERN_INFO "[%d]Netlink received msg payload:%s\n", pid, (char *)nlmsg_data(nlh));
+
+    hello_nl_send_msg(pid);
+
 }
 
 static int __init hello_init(void)
