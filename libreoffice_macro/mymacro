@@ -1,0 +1,73 @@
+
+REM  *****  BASIC  *****
+Sub Main
+Dim oDoc As Object
+Dim fromSheet As Object
+Dim dataSheet As Object
+Dim dataCell As Object
+
+Dim newSheet As Object
+Dim Sheets As Object
+Dim oCell as Object
+Dim oConv as Object
+
+Dim fromFilter as Object
+
+Dim oDataRange as Object
+
+dim fromFilterField(0) As New com.sun.star.sheet.TableFilterField   
+
+
+  oDoc = ThisComponent 
+  
+  oSheet = oDoc.Sheets  'get the container of all Sheets
+fromSheet = oSheet.getByName("from")   'get the sheet named Sheet2
+
+dataSheet = oSheet.getByName("data")   'get the sheet named Sheet2
+dataCell = dataSheet.getCellByPosition(0,0)
+
+Controller = oDoc.getcurrentController
+Controller.setActiveSheet(fromSheet)
+  
+  fromDataRange = fromSheet.getCellRangeByName("B6:B200")
+  
+  
+fromFilter = fromDataRange.createFilterDescriptor(true)
+fromDataRange.filter(fromFilter)  'Apply empty filter to reinitilize
+
+with fromFilter                                    
+    .ContainsHeader = true                      
+'   .CopyOutputData = true                      'to copy result eleswhere
+                                                'where to copy
+'   .OutputPosition = oTargetSheet.getCellRangeByName("A3").CellAddress
+    .UseRegularExpressions = true               'Use Regular expression
+end with
+
+with fromFilterField(0)
+    .Field = 0                  'Filter Col A
+    .IsNumeric = false          'Use String, not a number
+    .Operator = com.sun.star.sheet.FilterOperator.EQUAL
+    .StringValue = dataCell.string
+end with    
+
+fromFilter.setFilterFields(fromFilterField()) 
+fromDataRange.filter(fromFilter)
+
+REM 新建一個試算表檔案
+REM oDoc = starDeskTop.loadComponentFromUrl ("private:factory/scalc", "_blank",0,Array ())
+REM 開啟目前的試算表視窗
+REM oDoc = StarDesktop.CurrentComponent
+
+REM 建立新試算表分頁
+REM http://docs.sun.com/app/docs/doc/819-0439/faail?l=en&a=view
+newSheet = oDoc.createInstance("com.sun.star.sheet.Spreadsheet")
+oDoc.Sheets.insertByName("Stock1", newSheet)
+REM 取得試算表分頁
+newSheet = oDoc.Sheets.getByName("Stock1")
+REM 取得第幾個試算表分頁
+REM oSheet = oDoc.Sheets(0)
+
+oCell = newSheet.getCellByPosition (0,0)
+oCell.String = "我的第一個Input"
+End Sub
+
