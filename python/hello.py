@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 import sys
+import testmod
+
 
 ######################
-#  print array
+#  print tuple=() list=[] set={} set() dic={} dic{}
 ######################
 forarray = ["ham","spam","eggs","nuts"]
 print("----------")
