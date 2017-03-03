@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 
-from tkinter import *
+import tkinter as tk
+import os
 
-def on_click():
-    button['text'] = 'It is changed.'
-
-root = Tk(className='aaa')
-button = Button(root)
-button['text'] = 'change it'
-button['command'] = on_click    #事件关联函数
-button.pack()
+root = tk.Tk()
+tfield = tk.Text(root)
+tfield.pack()
+for line in os.popen("ls", 'r'):
+    tfield.insert("end", line)
 root.mainloop()
