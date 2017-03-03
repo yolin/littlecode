@@ -1,1 +1,5 @@
-echo "Subject: test" | msmtp --file=./msmtp.conf "yolin119@gmai.com"
+cat << EOF | msmtp --file=./msmtp_sn.conf "yung-ting.chuang@senao.com,yolin.tsai@senao.com"
+Subject: UID TEST !!
+
+UID!!!
+EOF
