@@ -26,8 +26,8 @@ int main() {
     } else {
 
         close(link[1]);
-        int nbytes = read(link[0], foo, sizeof(foo)); //read pip read
-        printf("Output: (%.*s)\n", nbytes, foo);
+        int nbytes = read(link[0], buf, sizeof(buf)); //read pip read
+        printf("Output: (%.*s)\n", nbytes, buf);
         wait(NULL);
 
     }
