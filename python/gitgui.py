@@ -135,6 +135,20 @@ for line in os.popen("ls /dev/ttyUSB*", 'r'):
 
 
 serial_port = 0
+power_port = 0
+
+def start_power_thread():
+    print("thread start...")
+    global power_port
+    index = listPower.curselection()[0]
+    power_port = serial.Serial(listPower.get(index)[0], baudrate=115200,
+            parity='N', stopbits=1, xonxoff=0, rtscts=0, timeout=0.1)
+    print(power_port)
+    thread = threading.Thread(target=read_from_port, args=(power_port,))
+    thread.daemon = True
+    thread.start()
+    print(listPower.get(index)[0]+" opend")
+
 
 def start_thread():
     print("thread start...")
@@ -171,9 +185,26 @@ def listboxcheck(event):
 
 def listpowercheck(event):
     labelPower.config(text="Power="+listPower.get(listPower.curselection()[0])[0])
-#thread = threading.Thread(target=listboxcheck)
-#thread.daemon = True
-#thread.start()
+    labelList.config(text="Dev="+listPower.get(listPower.curselection()[0])[0])
+    if(listPower.get("active")):
+        try:
+            if(serial_port.isOpen() == False):
+                print("not open serial")
+        except:
+            print("unexcept error")
+        else:
+            print("serial_port.close()")
+            serial_port.close()
+            time.sleep(2)
+            print("serial_port close ok")
+
+        index = listPower.curselection()[0]
+        print(listPower.get(index))
+        thread = threading.Thread(target=start_power_thread)
+        thread.daemon = True
+        thread.start()
+        time.sleep(1)
+
 
 
 listDev.bind('<ButtonRelease-1>', listboxcheck)
