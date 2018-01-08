@@ -1,0 +1,4 @@
+tcpdump -dd 來生出C使用的code。另外，tcpdump所生成的
+sample code預設只會抓取96個字元，所以要再加上-s參數來指定抓取的數量。
+
+tcpdump -d -s 2048 udp and host x.x.x.x
