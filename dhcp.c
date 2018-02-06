@@ -35,7 +35,9 @@ static int connections = 0;
 
 extern struct ippool_t *ippool;
 
-int global_xid;
+#define MAX_G_XID 20
+static int g_xid[MAX_G_XID];
+static int g_xid_idx = 0;
 
 struct dhcp_ctx {
   struct dhcp_t *parent;
@@ -3308,7 +3310,10 @@ static int dhcp_relay(struct dhcp_t *this,
 
   log_dbg("----------dhcp_relay  fd[%d]", this->relayfd);
   
-  global_xid = pack_dhcp -> xid;
+  g_xid[g_xid_idx] = pack_dhcp->xid;
+  g_xid_idx++;
+  if(g_xid_idx > MAX_G_XID) g_xid_idx = 0;
+
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   if(_options.bridgemode) {
@@ -5441,8 +5446,8 @@ int dhcp_relay_decaps(struct dhcp_t *this, int idx) {
   ssize_t length;
   uint8_t pack[1500];
   struct ifreq ifr;
-
   uint8_t fullpack[1500];
+  int cnt;
 
   log_dbg("----------dhcp_relay_decaps  fd[%d]", this->relayfd);
 if(_options.bridgemode)
@@ -5458,7 +5463,7 @@ if(_options.bridgemode)
     }
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    safe_strncpy(ifr.ifr_name, "br-lan", sizeof(ifr.ifr_name));
+    safe_strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
     // get interface mac
     if (ioctl(this->relayfd, SIOCGIFHWADDR, &ifr) < 0)
     {
@@ -5528,7 +5533,7 @@ if (!_options.bridgemode)
     log_err(0, "wrong message type length");
     return -1; /* Wrong length of message type */
   }
-  
+
   if (dhcp_hashget(this, &conn, packet.chaddr)) {
     /* Allocate new connection */
     if (dhcp_newconn(this, &conn, packet.chaddr)) {
@@ -5541,13 +5546,6 @@ if (!_options.bridgemode)
       struct ippoolm_t *occupy_ipm;
       struct in_addr offerip;
 
-      if(packet.xid != global_xid)
-      {
-          log_dbg("============> packet.xid[%x] global_xid[%x]", packet.xid, global_xid);
-          return 0;
-      }
-
-
       log_dbg("[BridgeMode] DHCP Reply: hisip %s / %.2X-%.2X-%.2X-%.2X-%.2X-%.2X", inet_ntoa(conn->hisip),
               conn->hismac[0], conn->hismac[1], conn->hismac[2],
               conn->hismac[3], conn->hismac[4], conn->hismac[5]);
@@ -5559,10 +5557,24 @@ if (!_options.bridgemode)
 
       switch(message_type->v[0]) {
           case DHCPOFFER:
+              log_dbg("[BridgeMode] recv DHCPOFFER %s", _options.dhcpif);
           case DHCPACK:
-              log_dbg("[BridgeMode] recv DHCPOFFER/DHCPACK %s", _options.dhcpif);
+              if(message_type->v[0] != DHCPOFFER) log_dbg("[BridgeMode] recv DHCPACK %s", _options.dhcpif);
               log_dbg("[BridgeMode] offerip:%s", inet_ntoa(offerip));
               log_dbg("[BridgeMode] hisip:%s", inet_ntoa(conn->hisip));
+              for(cnt=0; cnt<MAX_G_XID; cnt++)
+              {
+                  if(packet.xid == g_xid[cnt])
+                  {
+                      g_xid[cnt] = 0;
+                      break;
+                  }
+              }
+              if(cnt == MAX_G_XID)
+              {
+                  log_dbg("[BridgeMode] duplicate discovery/request, ignore this offer/ack");
+                  return -1;
+              }
               //Disconnect occupy connection
               if (!ippool_getip(ippool, &occupy_ipm, &offerip)) {
                   if (occupy_ipm && occupy_ipm->in_use) {
@@ -5953,10 +5965,13 @@ int dhcp_sendARP(struct dhcp_conn_t *conn, uint8_t *pack, size_t len) {
 	  conn->hismac[0], conn->hismac[1], conn->hismac[2],
 	  conn->hismac[3], conn->hismac[4], conn->hismac[5]);
   
+if(_options.bridgemode)
+{
   log_dbg("[BridgeMode] send arp... ip route replace %s dev %s", inet_ntoa(conn->hisip), _options.dhcpif);
   char cmd[128] = {0};
   sprintf(cmd, "ip route replace %s dev %s", inet_ntoa(conn->hisip), _options.dhcpif);
   system(cmd);
+}
 
   /* Ethernet header */
   memcpy(packet_ethh->dst, conn->hismac, PKT_ETH_ALEN);
