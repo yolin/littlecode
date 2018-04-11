@@ -86,6 +86,7 @@ read_again:
                 break;
             sz--;
         }
+        recvbuf[sz] = '\0';
         printf("-->[Yolin:%s:%d:%s]%s\n", __FILE__, __LINE__, __FUNCTION__, recvbuf);
 
     }
