@@ -10,7 +10,7 @@
 
 #define MAX_READ 256
 
-int server_socket ()
+static int __attribute__ ((noinline)) server_socket ()
 {
   struct sockaddr_un name;
   int sock;
