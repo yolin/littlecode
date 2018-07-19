@@ -1,5 +1,21 @@
+#set to double variable
+
 host=master
-master_IP=100
-aaa=$(eval echo \$${host}_IP)
+IP_master=100
+#don't use `eval ...`,  only support $(eval ...)
+aaa=$(eval echo \$IP_${host})
 
 echo $aaa
+
+
+#get  double
+
+for i in 1 2 3
+do
+eval AAA_$i=$i
+eval echo \${AAA_$i}
+done
+echo ${AAA_1}
+echo ${AAA_2}
+
+echo ${AAA_3}
