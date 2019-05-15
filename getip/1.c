@@ -36,7 +36,7 @@ int main()
 
     /* display result */
     printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-    printf("%.2x:%.2x:%.2x:%.2x:%.2x:%.2x", mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+    printf("%.02x:%.02x:%.02x:%.02x:%.02x:%.02x", mac[0]&0xff,mac[1]&0xff,mac[2]&0xff,mac[3]&0xff,mac[4]&0xff,mac[5]&0xff);
 
     return 0;
 }
