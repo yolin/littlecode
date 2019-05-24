@@ -100,5 +100,8 @@ int main(int argc, char *argv[])
 	if (sendto(sockfd, sendbuf, tx_len, 0, (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
 	    printf("Send failed\n");
 
+	close(sockfd);
+
+
 	return 0;
 }
