@@ -17,4 +17,5 @@ int main()
         printf("%s\n",buf);
         printf("---2--\n");
     }
+    fclose(fp);
 }
