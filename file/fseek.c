@@ -44,7 +44,7 @@ int main()
         rewind(pFile);
         fseek(pFile,0,SEEK_SET);
 
-        while(ftell(pFile)<size)
+        while(!feof(pFile))
         {
             printf("position %ld\n",ftell(pFile));
             fgets(mystring,1000,pFile);
