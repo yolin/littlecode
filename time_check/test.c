@@ -29,7 +29,7 @@ public:
     }
 
     void update_segment_start_time() {
-        segment_.new_one.start_time = boost::posix_time::second_clock::universal_time();
+        segment_.new_one.start_time = boost::posix_time::second_clock::universal_time() - boost::posix_time::seconds(20);
     }
 
     bool motion_dectected_in_last_segment_period();
@@ -49,11 +49,12 @@ std::time_t ptime_to_epoch_time(const boost::posix_time::ptime& pt) {
 bool recorder::motion_dectected_in_last_segment_period() {
     static std::time_t mot_update_time = 0;
     std::cout << "[TRACE] object_dectected_in_last_segment_period enter\n";
+    std::time_t start_time = ptime_to_epoch_time(segment_.new_one.start_time);
 
     if (fs::exists(OBJECT_DETECTION_METADATA_LOG)) {
         mot_update_time = fs::last_write_time(OBJECT_DETECTION_METADATA_LOG) + 2;
     }
-    else if (std::time(nullptr) < mot_update_time) {
+    else if (start_time < mot_update_time) {
         // do nothing
     }
     else {
@@ -71,7 +72,6 @@ bool recorder::motion_dectected_in_last_segment_period() {
     }
 
     std::time_t mot_start_time = fs::last_write_time(OBJECT_DETECTION_START_TIMESTAMP) - segment_.period * 2;
-    std::time_t start_time = ptime_to_epoch_time(segment_.new_one.start_time - boost::posix_time::milliseconds(segment_.time_offset_ms));
 
     std::cout << "[DEBUG] mot_update_time: " << mot_update_time << ", mot_start_time: " << mot_start_time << "\n";
     std::cout << "[DEBUG] start_time: " << start_time << "\n";
@@ -80,8 +80,6 @@ bool recorder::motion_dectected_in_last_segment_period() {
 }
 
 int main() {
-    std::ofstream(OBJECT_DETECTION_METADATA_LOG) << "simulate";
-    std::ofstream(OBJECT_DETECTION_START_TIMESTAMP) << "simulate";
 
     recorder r;
     int counter = 0;
@@ -89,12 +87,12 @@ int main() {
     while (true) {
         if (counter % 5 == 0) {
             r.update_segment_start_time();
-            std::time_t now = std::time(nullptr) - 10;
-            std::cout << "[UPDATE] segment_.new_one.start_time 更新為現在時間-10 seconds：" << now << std::endl;
+            std::cout << "[UPDATE] segment_.new_one.start_time 更新" << std::endl;
         }
 
         bool result = r.motion_dectected_in_last_segment_period();
-        std::cout << "[CHECK] " << (result ? "✅ Motion Detected" : "❌ No Motion") << std::endl;
+        std::time_t now = std::time(nullptr);
+        std::cout << "[CHECK] " << now << (result ? "✅ Motion Detected" : "❌ No Motion") << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         counter++;
